@@ -67,7 +67,7 @@ object YouTubeVideoRelayClient {
 	}
 
 	fun checkChannel(channelId: String): Int {
-		var body = HttpRequest.get("https://socialblade.com/js/class/youtube-video-recent")
+		val body = HttpRequest.get("https://socialblade.com/js/class/youtube-video-recent")
 				.userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0")
 				.form("channelid", channelId)
 				.body()
@@ -96,9 +96,9 @@ object YouTubeVideoRelayClient {
 		val millis = calendar.timeInMillis
 		val now = System.currentTimeMillis()
 		val diff = now - millis
-		val days = Math.max(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) - 3, 0)
+		val days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
 
-		val percentage = Math.min((days.toDouble()) / 7, 1.0)
+		val percentage = Math.min((Math.max(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) - 3, 0).toDouble()) / 7, 1.0)
 
 		val count = if (channelId == "UC-eeXSRZ8cO-i2NZYrWGDnQ") { // Utilizado apenas para testes, "MrPowerGamerBR"
 			0
