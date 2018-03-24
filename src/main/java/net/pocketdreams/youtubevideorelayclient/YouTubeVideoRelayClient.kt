@@ -47,9 +47,6 @@ object YouTubeVideoRelayClient {
 		if (channelMap.containsKey(channelId)) // Já está verificando o canal atual!
 			return
 
-		if (ignoreChannelIds.contains(channelId))
-			return
-
 		channelMap.put(channelId, UNINITALIZED_VIDEO_ID)
 
 		launch {
@@ -77,6 +74,7 @@ object YouTubeVideoRelayClient {
 		// Se o payload.size() == 0, ou o canal não tem vídeo ou o canal não existe
 		// caso isto seja verdade, nós iremos ignorar os updates deste canal por uma hora
 		if (payload.size() == 0) {
+			logger.info("Canal $channelId não tem nenhum vídeo ou o canal não existe! Esperando uma hora antes de verificar novamente...")
 			return 3600000
 		}
 
@@ -104,15 +102,15 @@ object YouTubeVideoRelayClient {
 			0
 		} else {
 			((900000 * (percentage)).toInt())
-		} + 50 // .05s de delay apenas para evitar problemas
+		} + 250 // .25s de delay apenas para evitar problemas
 
 		if (channelMap[channelId] == UNINITALIZED_VIDEO_ID) {
-			logger.info("$days dias | ${channelMap.values.count { it != UNINITALIZED_VIDEO_ID }} | Canal adicionado: $channelId ~ Irei esperar ${count} ms (${(count / 1000) / 60} minutos)")
+			logger.info("$days dias | ${channelMap.values.count { it != UNINITALIZED_VIDEO_ID }} canais | Canal adicionado: $channelId (Último vídeo enviado: \"$lastVideoTitle\" $videoId) ~ Irei esperar ${count} ms (${(count / 1000) / 60} minutos)")
 		}
 
 		if (channelMap[channelId] != UNINITALIZED_VIDEO_ID && channelMap[channelId] != videoId) {
 			// Anunciar novo vídeo!
-			logger.info("$days dias | Anunciando novo vídeo de \"$lastVideoTitle\" $videoId - Vídeo velho: ${channelMap[channelId]}")
+			logger.info("$days dias | ${channelMap.values.count { it != UNINITALIZED_VIDEO_ID }} canais | Anunciando novo vídeo de \"$lastVideoTitle\" $videoId - Vídeo velho: ${channelMap[channelId]}")
 
 			val s = Socket("127.0.0.1", 10699)
 			val toServer = OutputStreamWriter(s.getOutputStream(), "UTF-8")
